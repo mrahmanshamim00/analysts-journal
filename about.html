@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>About - Analyst's Journal</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Merriweather:ital,wght@0,400;0,700;0,900;1,400&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        background: "#fbf9f9",
+                        "primary-fixed-dim": "#ffb4ac",
+                        "on-tertiary-container": "#d4d5d5",
+                        error: "#ba1a1a",
+                        "surface-dim": "#dbdad9",
+                        "on-primary-fixed-variant": "#92030f",
+                        "surface-tint": "#b52424",
+                        "tertiary-container": "#5b5c5c",
+                        "on-tertiary-fixed-variant": "#454747",
+                        "on-surface": "#1b1c1c",
+                        "inverse-primary": "#ffb4ac",
+                        "tertiary-fixed-dim": "#c6c6c7",
+                        surface: "#fbf9f9",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#5a403e",
+                        "surface-container-highest": "#e4e2e2",
+                        "primary-fixed": "#ffdad6",
+                        "surface-container": "#efeded",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#1c1b1b",
+                        outline: "#8e706d",
+                        "surface-variant": "#e4e2e2",
+                        "surface-container-low": "#f5f3f3",
+                        "on-primary-fixed": "#410003",
+                        tertiary: "#434545",
+                        "outline-variant": "#e2beba",
+                        "on-primary-container": "#ffc8c2",
+                        "secondary-container": "#e2dfde",
+                        "on-tertiary-fixed": "#1a1c1c",
+                        "surface-container-high": "#e9e8e7",
+                        "inverse-on-surface": "#f2f0f0",
+                        secondary: "#5f5e5e",
+                        "on-background": "#1b1c1c",
+                        "surface-bright": "#fbf9f9",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "tertiary-fixed": "#e2e2e2",
+                        primary: "#8f000d",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#474746",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#e5e2e1",
+                        "on-secondary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "primary-container": "#b22222",
+                        "inverse-surface": "#303031",
+                        "on-secondary-container": "#636262"
+                    },
+                    spacing: {
+                        "section-gap": "80px",
+                        "margin-mobile": "16px",
+                        "reading-column": "720px",
+                        "container-max": "1200px",
+                        base: "8px",
+                        gutter: "24px"
+                    },
+                    fontFamily: {
+                        "label-caps": ["Inter"],
+                        "headline-lg-mobile": ["Merriweather"],
+                        "headline-md": ["Merriweather"],
+                        "headline-lg": ["Merriweather"],
+                        "body-md": ["Inter"],
+                        "headline-xl": ["Merriweather"],
+                        "body-lg": ["Inter"],
+                        quote: ["Merriweather"]
+                    },
+                    fontSize: {
+                        "label-caps": ["12px", { lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "700" }],
+                        "headline-lg-mobile": ["28px", { lineHeight: "1.2", fontWeight: "700" }],
+                        "headline-md": ["24px", { lineHeight: "1.3", fontWeight: "700" }],
+                        "headline-lg": ["32px", { lineHeight: "1.2", fontWeight: "700" }],
+                        "body-md": ["16px", { lineHeight: "1.6", fontWeight: "400" }],
+                        "headline-xl": ["48px", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "900" }],
+                        "body-lg": ["20px", { lineHeight: "1.7", fontWeight: "400" }],
+                        quote: ["24px", { lineHeight: "1.5", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased min-h-screen flex flex-col pt-16">
+    <!-- TopNavBar -->
+    <nav class="bg-background fixed top-0 w-full border-b border-on-surface/10 z-50">
+        <div class="flex justify-between items-center w-full px-gutter max-w-container-max mx-auto h-16">
+            <a class="text-headline-md font-headline-md font-black tracking-tight text-on-surface" href="#">
+                Analyst's Journal
+            </a>
+            <div class="hidden md:flex items-center gap-8">
+                <a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary transition-colors duration-200" href="#">Home</a>
+                <a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary transition-colors duration-200" href="#">Essays</a>
+                <a class="text-primary border-b-2 border-primary pb-1 opacity-80 font-label-caps text-label-caps" href="#">About</a>
+            </div>
+            <button class="bg-on-surface text-surface-container-lowest font-label-caps text-label-caps px-6 py-3 hover:bg-primary transition-colors duration-200">
+                Subscribe
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-reading-column mx-auto px-margin-mobile md:px-0 py-section-gap">
+        <!-- Header -->
+        <header class="mb-16 border-b-2 border-on-surface pb-8">
+            <h1 class="text-headline-xl font-headline-xl text-on-surface mb-6">About</h1>
+            <p class="text-body-lg font-body-lg text-on-surface-variant max-w-2xl">
+                Independent political analyst focused on institutional dynamics, pragmatic governance, and the mechanics of power.
+            </p>
+        </header>
+
+        <!-- Biography -->
+        <article class="space-y-8 text-body-lg font-body-lg mb-section-gap">
+            <p>
+                Your biography goes here. Write about your background, experience, and approach to political analysis. Focus on what makes your perspective unique and valuable to readers.
+            </p>
+            <p>
+                Describe your experience and methodology. What institutions have you worked with? What topics do you specialize in? Why does this work matter to you?
+            </p>
+            <p>
+                Add any notable publications, appearances, or achievements. Explain what readers can expect from your analysis and why your voice matters in the conversation.
+            </p>
+        </article>
+
+        <hr class="border-t border-on-surface/10 mb-16"/>
+
+        <!-- Philosophy Section -->
+        <section class="mb-section-gap">
+            <h2 class="text-headline-lg font-headline-lg text-on-surface mb-8">Editorial Philosophy</h2>
+            <div class="space-y-12">
+                <div class="border-l-4 border-primary pl-6">
+                    <h3 class="text-headline-md font-headline-md text-on-surface mb-4">Your First Principle</h3>
+                    <p class="text-body-md font-body-md text-on-surface-variant">
+                        Describe your core analytical principle. What do you believe that guides your work? What methodology do you use?
+                    </p>
+                </div>
+                <div class="border-l-4 border-primary pl-6">
+                    <h3 class="text-headline-md font-headline-md text-on-surface mb-4">Your Second Principle</h3>
+                    <p class="text-body-md font-body-md text-on-surface-variant">
+                        Another key principle that shapes your analysis. What do you prioritize? What do you avoid?
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="bg-on-surface text-surface-container-lowest p-12 border border-on-surface">
+            <h2 class="text-headline-lg font-headline-lg mb-6">Contact</h2>
+            <p class="text-body-md font-body-md mb-8 opacity-80">
+                For professional inquiries, speaking engagements, or editorial correspondence.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-6">
+                <a class="inline-flex items-center gap-2 border border-surface-container-lowest px-6 py-3 font-label-caps text-label-caps hover:bg-primary transition-colors duration-200" href="mailto:you@example.com">
+                    <span class="material-symbols-outlined text-[16px]">mail</span>
+                    Email Directly
+                </a>
+                <a class="inline-flex items-center gap-2 border border-surface-container-lowest px-6 py-3 font-label-caps text-label-caps hover:bg-primary transition-colors duration-200" href="#">
+                    <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                    X / Twitter
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-inverse-surface w-full py-12 mt-section-gap border-t-4 border-primary">
+        <div class="flex flex-col md:flex-row justify-between items-start w-full px-gutter max-w-container-max mx-auto gap-8">
+            <div>
+                <div class="text-headline-md font-headline-md text-surface-container-lowest mb-4">
+                    Analyst's Journal
+                </div>
+                <div class="text-primary-fixed-dim text-body-md font-body-md">
+                    © 2024 Independent Analysis. All rights reserved.
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-8">
+                <a class="text-inverse-on-surface/70 hover:text-primary-fixed transition-all font-label-caps text-label-caps uppercase" href="#">Terms</a>
+                <a class="text-inverse-on-surface/70 hover:text-primary-fixed transition-all font-label-caps text-label-caps uppercase" href="#">Privacy</a>
+                <a class="text-inverse-on-surface/70 hover:text-primary-fixed transition-all font-label-caps text-label-caps uppercase" href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
