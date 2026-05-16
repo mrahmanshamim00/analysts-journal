@@ -3,8 +3,9 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>The Illusion of Consensus | Analyst's Journal</title>
+    <title>Essays | Analyst's Journal</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Merriweather:ital,wght@0,400;0,700;0,900;1,400&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script id="tailwind-config">
         tailwind.config = {
@@ -105,8 +106,8 @@
                 Analyst's Journal
             </a>
             <div class="hidden md:flex items-center gap-8">
-                <a class="text-primary border-b-2 border-primary pb-1 opacity-80 font-label-caps text-label-caps" href="index.html">Home</a>
-                <a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary transition-colors duration-200" href="essay.html">Essays</a>
+                <a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary transition-colors duration-200" href="index.html">Home</a>
+                <a class="text-primary border-b-2 border-primary pb-1 opacity-80 font-label-caps text-label-caps" href="essay.html">Essays</a>
                 <a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary transition-colors duration-200" href="about.html">About</a>
             </div>
             <button class="bg-on-surface text-surface-container-lowest font-label-caps text-label-caps px-6 py-3 hover:bg-primary transition-colors duration-200">
@@ -117,76 +118,7 @@
 
     <!-- Main Content -->
     <main class="flex-grow w-full max-w-reading-column mx-auto px-margin-mobile md:px-0 py-section-gap">
-        <!-- Article Header -->
-        <header class="mb-12">
-            <a href="index.html" class="text-label-caps font-label-caps text-primary uppercase mb-6 inline-block hover:text-primary-container transition-colors">← Back to Essays</a>
-            <span class="text-label-caps font-label-caps text-on-surface-variant uppercase block mb-4">October 24, 2024</span>
-            <h1 class="text-headline-xl font-headline-xl text-on-surface mb-6">The Illusion of Consensus</h1>
-            <p class="text-headline-md font-headline-md text-on-surface-variant">
-                Why modern political mandates are built on shifting sands, and what happens when the tide goes out.
-            </p>
-        </header>
-
-        <hr class="border-t border-on-surface/20 mb-12"/>
-
-        <!-- Article Body -->
-        <article class="prose text-body-lg font-body-lg text-on-surface">
-            <p>
-                Begin your essay here. This template uses a 720px reading column optimized for comfortable long-form reading. The typography follows editorial best practices with generous line height (1.7) and clear hierarchy.
-            </p>
-            <p>
-                Your introduction should capture attention and establish your thesis. What are you arguing? Why does it matter now? What will the reader understand by the end that they don't understand now?
-            </p>
-
-            <blockquote class="quote font-quote text-on-surface border-l-4 border-primary pl-6 py-2 my-8">
-                A powerful quote from your essay that captures a key insight or provocation. Use the serif font and red accent border to set it apart from the body text.
-            </blockquote>
-
-            <h2 class="text-headline-lg font-headline-lg text-on-surface mt-12 mb-6">First Major Point</h2>
-            <p>
-                Develop your first argument here. Provide evidence, examples, and logical progression. Your writing should build toward your conclusion systematically.
-            </p>
-            <p>
-                Remember the editorial philosophy: focus on structural analysis over sentiment. Explain how systems work rather than how they should work in an idealized vacuum.
-            </p>
-
-            <h2 class="text-headline-lg font-headline-lg text-on-surface mt-12 mb-6">Second Major Point</h2>
-            <p>
-                Continue developing your argument. Each paragraph should advance your thesis. Use specific examples and concrete evidence rather than abstract generalizations.
-            </p>
-
-            <h2 class="text-headline-lg font-headline-lg text-on-surface mt-12 mb-6">Conclusion</h2>
-            <p>
-                Summarize your argument and its implications. What happens next? What should readers do with this information? Leave them with something to think about.
-            </p>
-        </article>
-
-        <hr class="border-t border-on-surface/20 mt-16 mb-12"/>
-
-        <!-- Author Bio -->
-        <div class="flex flex-col sm:flex-row gap-8 items-start">
-            <div class="w-20 h-20 bg-surface-container flex items-center justify-center text-on-surface-variant text-2xl font-headline-md">
-                YN
-            </div>
-            <div>
-                <h3 class="text-headline-md font-headline-md text-on-surface mb-2">Your Name</h3>
-                <p class="text-body-md font-body-md text-on-surface-variant">
-                    Independent political analyst. [Add a brief bio line here].
-                </p>
-            </div>
-        </div>
-
-        <!-- Newsletter -->
-        <section class="bg-on-surface text-surface-container-lowest p-12 border border-on-surface mt-16">
-            <h2 class="text-headline-lg font-headline-lg mb-4">Enjoyed this essay?</h2>
-            <p class="text-body-md font-body-md mb-6 opacity-80">Subscribe for weekly analysis. No spam, unsubscribe anytime.</p>
-            <div class="flex flex-col sm:flex-row gap-4">
-                <input type="email" placeholder="Your email address" class="flex-1 bg-transparent border border-surface-container-lowest px-4 py-3 text-body-md font-body-md text-surface-container-lowest placeholder:text-surface-container-lowest/50 focus:outline-none focus:border-primary"/>
-                <button class="bg-primary text-on-primary px-8 py-3 font-label-caps text-label-caps uppercase hover:bg-primary-container transition-colors duration-200">
-                    Subscribe
-                </button>
-            </div>
-        </section>
+        <div id="content"></div>
     </main>
 
     <!-- Footer -->
@@ -207,5 +139,115 @@
             </div>
         </div>
     </footer>
+
+    <script src="js/supabase.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const slug = urlParams.get('slug');
+
+        async function render() {
+            const content = document.getElementById('content');
+
+            if (slug) {
+                // Show single essay
+                const { data: essay, error } = await getEssayBySlug(slug);
+                if (error || !essay) {
+                    content.innerHTML = '<p class="text-body-lg">Essay not found.</p><a href="essay.html" class="text-primary hover:underline">← Back to Essays</a>';
+                    return;
+                }
+
+                const { data: comments } = await getComments(essay.id);
+                const publishedDate = new Date(essay.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+                content.innerHTML = `
+                    <header class="mb-12">
+                        <a href="essay.html" class="text-label-caps font-label-caps text-primary uppercase mb-6 inline-block hover:text-primary-container transition-colors">← Back to Essays</a>
+                        <span class="text-label-caps font-label-caps text-on-surface-variant uppercase block mb-4">${publishedDate}</span>
+                        <h1 class="text-headline-xl font-headline-xl text-on-surface mb-6">${essay.title}</h1>
+                        ${essay.excerpt ? `<p class="text-headline-md font-headline-md text-on-surface-variant">${essay.excerpt}</p>` : ''}
+                    </header>
+                    <hr class="border-t border-on-surface/20 mb-12"/>
+                    <article class="prose text-body-lg font-body-lg text-on-surface">
+                        ${essay.content}
+                    </article>
+                    <hr class="border-t border-on-surface/20 mt-16 mb-12"/>
+                    <section>
+                        <h2 class="text-headline-lg font-headline-lg text-on-surface mb-8">Comments (${comments.length})</h2>
+                        <div id="comments-list" class="flex flex-col gap-6 mb-8">
+                            ${comments.map(c => `
+                                <div class="border border-on-surface/10 p-4 rounded">
+                                    <div class="text-label-caps font-label-caps text-primary mb-2">${c.name}</div>
+                                    <p class="text-body-md text-on-surface">${c.content}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <form id="comment-form" class="flex flex-col gap-4 bg-surface-container p-6">
+                            <h3 class="text-headline-md font-headline-md text-on-surface mb-2">Leave a Comment</h3>
+                            <input type="text" id="comment-name" required placeholder="Your name" class="bg-transparent border border-on-surface/20 px-4 py-3 text-body-md text-on-surface placeholder:text-on-surface/50 focus:outline-none focus:border-primary"/>
+                            <textarea id="comment-content" required placeholder="Your comment" rows="3" class="bg-transparent border border-on-surface/20 px-4 py-3 text-body-md text-on-surface placeholder:text-on-surface/50 focus:outline-none focus:border-primary resize-none"></textarea>
+                            <button type="submit" class="bg-primary text-on-primary px-8 py-3 font-label-caps text-label-caps uppercase hover:bg-primary-container transition-colors duration-200 self-start">
+                                Post Comment
+                            </button>
+                            <p id="comment-msg" class="text-body-md hidden"></p>
+                        </form>
+                    </section>
+                `;
+
+                document.getElementById('comment-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById('comment-name').value;
+                    const content = document.getElementById('comment-content').value;
+                    const msgEl = document.getElementById('comment-msg');
+
+                    const { success, error } = await addComment(essay.id, name, content);
+                    if (success) {
+                        msgEl.textContent = '✓ Comment posted!';
+                        msgEl.className = 'text-body-md text-green-600 mt-2';
+                        document.getElementById('comment-form').reset();
+                        render(); // Reload to show new comment
+                    } else {
+                        msgEl.textContent = 'Error: ' + (error?.message || 'Failed to post comment');
+                        msgEl.className = 'text-body-md text-red-600 mt-2';
+                    }
+                    msgEl.classList.remove('hidden');
+                });
+            } else {
+                // Show essay list
+                const { data: essays } = await getEssays();
+
+                if (!essays || essays.length === 0) {
+                    content.innerHTML = `
+                        <header class="mb-12">
+                            <h1 class="text-headline-xl font-headline-xl text-on-surface mb-6">Essays</h1>
+                            <p class="text-body-lg text-on-surface-variant">No essays published yet.</p>
+                        </header>
+                    `;
+                    return;
+                }
+
+                content.innerHTML = `
+                    <header class="mb-12">
+                        <h1 class="text-headline-xl font-headline-xl text-on-surface mb-6">Essays</h1>
+                        <p class="text-body-lg text-on-surface-variant">Analysis and commentary on politics, power, and governance.</p>
+                    </header>
+                    <hr class="border-t border-on-surface/20 mb-12"/>
+                    <div class="flex flex-col gap-12">
+                        ${essays.map(essay => {
+                            const date = new Date(essay.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                            return `
+                                <article class="flex flex-col gap-3 group border-b border-on-surface/10 pb-8 last:border-0">
+                                    <span class="text-label-caps font-label-caps text-primary uppercase">${date}</span>
+                                    <a href="essay.html?slug=${essay.slug}" class="text-headline-lg-mobile md:text-headline-lg font-headline-lg text-on-surface group-hover:text-primary transition-colors duration-200">${essay.title}</a>
+                                    ${essay.excerpt ? `<p class="text-body-md font-body-md text-on-surface-variant">${essay.excerpt}</p>` : ''}
+                                </article>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        render();
+    </script>
 </body>
 </html>

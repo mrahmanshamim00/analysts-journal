@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Admin - Analyst's Journal</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Merriweather:ital,wght@0,400;0,700;0,900;1,400&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        background: "#fbf9f9",
+                        primary: "#8f000d",
+                        "on-surface": "#1b1c1c",
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#5a403e",
+                        "surface-variant": "#e4e2e2",
+                        "primary-container": "#b22222"
+                    },
+                    spacing: {
+                        "section-gap": "80px",
+                        "margin-mobile": "16px",
+                        "reading-column": "720px",
+                        "container-max": "1200px",
+                        base: "8px",
+                        gutter: "24px"
+                    },
+                    fontFamily: {
+                        "label-caps": ["Inter"],
+                        "headline-lg-mobile": ["Merriweather"],
+                        "headline-lg": ["Merriweather"],
+                        "body-md": ["Inter"]
+                    },
+                    fontSize: {
+                        "label-caps": ["12px", { lineHeight: "1.0", letterSpacing: "0.1em", fontWeight: "700" }],
+                        "headline-lg-mobile": ["28px", { lineHeight: "1.2", fontWeight: "700" }],
+                        "headline-lg": ["32px", { lineHeight: "1.2", fontWeight: "700" }],
+                        "body-md": ["16px", { lineHeight: "1.6", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen">
+    <div class="max-w-2xl mx-auto py-12 px-6">
+        <h1 class="text-headline-lg font-headline-lg mb-8">Add New Essay</h1>
+        <form id="essay-form" class="flex flex-col gap-6">
+            <div>
+                <label class="block text-label-caps font-label-caps mb-2">Title</label>
+                <input type="text" id="title" required class="w-full border border-on-surface/20 px-4 py-3 text-body-md focus:outline-none focus:border-primary"/>
+            </div>
+            <div>
+                <label class="block text-label-caps font-label-caps mb-2">Slug (URL-friendly, e.g., my-essay-title)</label>
+                <input type="text" id="slug" required class="w-full border border-on-surface/20 px-4 py-3 text-body-md focus:outline-none focus:border-primary"/>
+            </div>
+            <div>
+                <label class="block text-label-caps font-label-caps mb-2">Excerpt (short summary)</label>
+                <textarea id="excerpt" rows="2" class="w-full border border-on-surface/20 px-4 py-3 text-body-md focus:outline-none focus:border-primary"></textarea>
+            </div>
+            <div>
+                <label class="block text-label-caps font-label-caps mb-2">Content (HTML allowed)</label>
+                <textarea id="content" rows="15" required class="w-full border border-on-surface/20 px-4 py-3 text-body-md focus:outline-none focus:border-primary font-mono"></textarea>
+            </div>
+            <button type="submit" class="bg-primary text-on-primary px-8 py-3 font-label-caps text-label-caps uppercase hover:bg-primary-container transition-colors duration-200 self-start">
+                Publish Essay
+            </button>
+            <p id="msg" class="text-body-md hidden"></p>
+        </form>
+
+        <hr class="my-12 border-on-surface/20"/>
+
+        <h2 class="text-headline-lg font-headline-lg mb-6">Existing Essays</h2>
+        <div id="essays-list" class="flex flex-col gap-4"></div>
+    </div>
+
+    <script src="js/supabase.js"></script>
+    <script>
+        // Load existing essays
+        async function loadEssays() {
+            const { data } = await getEssays();
+            const list = document.getElementById('essays-list');
+            if (!data || data.length === 0) {
+                list.innerHTML = '<p class="text-on-surface-variant">No essays yet.</p>';
+                return;
+            }
+            list.innerHTML = data.map(e => `
+                <div class="border border-on-surface/10 p-4 flex justify-between items-center">
+                    <div>
+                        <div class="font-bold">${e.title}</div>
+                        <div class="text-sm text-on-surface-variant">${e.slug}</div>
+                    </div>
+                    <a href="essay.html?slug=${e.slug}" target="_blank" class="text-primary hover:underline text-sm">View</a>
+                </div>
+            `).join('');
+        }
+
+        // Generate slug from title
+        document.getElementById('title').addEventListener('input', (e) => {
+            const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            document.getElementById('slug').value = slug;
+        });
+
+        // Submit essay
+        document.getElementById('essay-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const slug = document.getElementById('slug').value;
+            const excerpt = document.getElementById('excerpt').value;
+            const content = document.getElementById('content').value;
+            const msgEl = document.getElementById('msg');
+            const btn = e.target.querySelector('button');
+
+            btn.textContent = 'Publishing...';
+            btn.disabled = true;
+
+            const { error } = await supabaseClient.from('essays').insert({
+                title,
+                slug,
+                excerpt,
+                content
+            });
+
+            if (error) {
+                msgEl.textContent = 'Error: ' + error.message;
+                msgEl.className = 'text-body-md text-red-600 mt-2';
+            } else {
+                msgEl.textContent = '✓ Essay published!';
+                msgEl.className = 'text-body-md text-green-600 mt-2';
+                e.target.reset();
+                loadEssays();
+            }
+
+            btn.textContent = 'Publish Essay';
+            btn.disabled = false;
+            msgEl.classList.remove('hidden');
+        });
+
+        loadEssays();
+    </script>
+</body>
+</html>

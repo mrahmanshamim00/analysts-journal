@@ -5,6 +5,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Analyst's Journal | Independent Political Analysis</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Merriweather:ital,wght@0,400;0,700;0,900;1,400&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script id="tailwind-config">
         tailwind.config = {
@@ -149,12 +150,13 @@
         <section class="max-w-reading-column mx-auto w-full bg-on-surface text-surface-container-lowest p-12 border border-on-surface">
             <h2 class="text-headline-lg font-headline-lg mb-4">Stay Informed</h2>
             <p class="text-body-md font-body-md mb-6 opacity-80">Weekly analysis delivered to your inbox. No noise, no spam.</p>
-            <div class="flex flex-col sm:flex-row gap-4">
-                <input type="email" placeholder="Your email address" class="flex-1 bg-transparent border border-surface-container-lowest px-4 py-3 text-body-md font-body-md text-surface-container-lowest placeholder:text-surface-container-lowest/50 focus:outline-none focus:border-primary"/>
-                <button class="bg-primary text-on-primary px-8 py-3 font-label-caps text-label-caps uppercase hover:bg-primary-container transition-colors duration-200">
+            <form id="subscribe-form" class="flex flex-col sm:flex-row gap-4">
+                <input type="email" id="sub-email" required placeholder="Your email address" class="flex-1 bg-transparent border border-surface-container-lowest px-4 py-3 text-body-md font-body-md text-surface-container-lowest placeholder:text-surface-container-lowest/50 focus:outline-none focus:border-primary"/>
+                <button type="submit" class="bg-primary text-on-primary px-8 py-3 font-label-caps text-label-caps uppercase hover:bg-primary-container transition-colors duration-200">
                     Subscribe
                 </button>
-            </div>
+            </form>
+            <p id="sub-message" class="mt-4 text-body-md hidden"></p>
         </section>
     </main>
 
@@ -173,5 +175,31 @@
             </div>
         </div>
     </footer>
+    <script src="js/supabase.js"></script>
+    <script>
+        document.getElementById('subscribe-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('sub-email').value;
+            const msgEl = document.getElementById('sub-message');
+            const btn = e.target.querySelector('button');
+            btn.textContent = 'Subscribing...';
+            btn.disabled = true;
+
+            const { success, error } = await subscribe(email);
+
+            if (success) {
+                msgEl.textContent = '✓ Thanks for subscribing!';
+                msgEl.className = 'mt-4 text-body-md text-green-400';
+                document.getElementById('sub-email').value = '';
+            } else {
+                msgEl.textContent = 'Error: ' + (error?.message || 'Something went wrong');
+                msgEl.className = 'mt-4 text-body-md text-red-400';
+            }
+
+            btn.textContent = 'Subscribe';
+            btn.disabled = false;
+            msgEl.classList.remove('hidden');
+        });
+    </script>
 </body>
 </html>
