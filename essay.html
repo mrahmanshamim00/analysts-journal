@@ -13,7 +13,7 @@
     <meta property="og:url" content="https://mrahmanshamim00.github.io/analysts-journal/essay.html"/>
     <meta property="og:title" content="Analyst's Journal | Independent Political Analysis"/>
     <meta property="og:description" content="Independent political analysis and essays on politics, power, and governance."/>
-    <meta property="og:image" content="https://mrahmanshamim00.github.io/analysts-journal/og-image.png"/>
+    <meta property="og:image" content="https://placehold.co/1200x630/8f000d/ffffff?text=Analyst%27s+Journal"/>
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image"/>
@@ -253,6 +253,10 @@
                 if (essay.thumbnail) {
                     document.querySelector('meta[property="og:image"]').setAttribute('content', essay.thumbnail);
                     document.querySelector('meta[name="twitter:image"]').setAttribute('content', essay.thumbnail);
+                } else {
+                    // Use a placeholder image when no thumbnail
+                    document.querySelector('meta[property="og:image"]').setAttribute('content', 'https://placehold.co/1200x630/8f000d/ffffff?text=Analyst%27s+Journal');
+                    document.querySelector('meta[name="twitter:image"]').setAttribute('content', 'https://placehold.co/1200x630/8f000d/ffffff?text=Analyst%27s+Journal');
                 }
                 document.title = essay.title + ' | Analyst\'s Journal';
 
