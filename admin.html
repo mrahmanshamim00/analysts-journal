@@ -51,8 +51,53 @@
     </style>
 </head>
 <body class="bg-background text-on-surface font-body-md antialiased min-h-screen">
-    <div class="max-w-2xl mx-auto py-12 px-6">
-        <h1 class="text-headline-lg font-headline-lg mb-8">Add New Essay</h1>
+    <!-- Login Section -->
+    <div id="login-section" class="max-w-md mx-auto py-12 px-6">
+        <h1 class="text-headline-lg font-headline-lg mb-8 text-center">Admin Login</h1>
+        <div id="login-form-container">
+            <form id="login-form" class="flex flex-col gap-6">
+                <div>
+                    <label class="block text-label-caps font-label-caps mb-2">Email</label>
+                    <input type="email" id="login-email" required class="w-full border border-on-surface/20 px-4 py-3 text-body-md focus:outline-none focus:border-primary"/>
+                </div>
+                <div>
+                    <label class="block text-label-caps font-label-caps mb-2">Password</label>
+                    <input type="password" id="login-password" required class="w-full border border-on-surface/20 px-4 py-3 text-body-md focus:outline-none focus:border-primary"/>
+                </div>
+                <button type="submit" class="bg-primary text-on-primary px-8 py-3 font-label-caps text-label-caps uppercase hover:bg-primary-container transition-colors duration-200">
+                    Login
+                </button>
+                <p id="login-msg" class="text-body-md text-center hidden"></p>
+            </form>
+        </div>
+
+        <div id="setup-form-container" class="hidden">
+            <p class="text-body-md text-on-surface-variant mb-6 text-center">Create your admin account (first time setup)</p>
+            <form id="setup-form" class="flex flex-col gap-6">
+                <div>
+                    <label class="block text-label-caps font-label-caps mb-2">Email</label>
+                    <input type="email" id="setup-email" required class="w-full border border-on-surface/20 px-4 py-3 text-body-md focus:outline-none focus:border-primary"/>
+                </div>
+                <div>
+                    <label class="block text-label-caps font-label-caps mb-2">Password</label>
+                    <input type="password" id="setup-password" required minlength="6" class="w-full border border-on-surface/20 px-4 py-3 text-body-md focus:outline-none focus:border-primary"/>
+                </div>
+                <button type="submit" class="bg-primary text-on-primary px-8 py-3 font-label-caps text-label-caps uppercase hover:bg-primary-container transition-colors duration-200">
+                    Create Admin Account
+                </button>
+                <p id="setup-msg" class="text-body-md text-center hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard (hidden by default) -->
+    <div id="admin-section" class="hidden max-w-2xl mx-auto py-12 px-6">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-headline-lg font-headline-lg">Admin Dashboard</h1>
+            <button onclick="logout()" class="text-primary hover:underline text-body-md">Logout</button>
+        </div>
+
+        <h2 class="text-headline-lg font-headline-lg mb-6">Add New Essay</h2>
         <form id="essay-form" class="flex flex-col gap-6">
             <div>
                 <label class="block text-label-caps font-label-caps mb-2">Title</label>
@@ -92,6 +137,136 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9idHR4cGR1eWZjYXloc2Jlem5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NTY1NTAsImV4cCI6MjA5NDUzMjU1MH0.Ig_P6D7YtDR4pmXuEL04svp0FDz3pFHNYPVaA2x12cQ';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Simple hash function for password (in production, use proper hashing)
+        function hashPassword(password) {
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                const char = password.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return hash.toString(16);
+        }
+
+        // Check if admin exists
+        async function checkAdmin() {
+            const { data, error } = await supabaseClient
+                .from('admin_users')
+                .select('id')
+                .limit(1);
+
+            if (error) {
+                console.error('Error checking admin:', error);
+                return true; // Show setup if error
+            }
+
+            if (!data || data.length === 0) {
+                // No admin exists, show setup form
+                document.getElementById('login-form-container').classList.add('hidden');
+                document.getElementById('setup-form-container').classList.remove('hidden');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Check if user is logged in
+        function isLoggedIn() {
+            const adminData = localStorage.getItem('admin_session');
+            return adminData !== null;
+        }
+
+        // Login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const msgEl = document.getElementById('login-msg');
+            const btn = e.target.querySelector('button');
+
+            btn.textContent = 'Logging in...';
+            btn.disabled = true;
+
+            const { data, error } = await supabaseClient
+                .from('admin_users')
+                .select('*')
+                .eq('email', email)
+                .single();
+
+            if (error || !data) {
+                msgEl.textContent = 'Invalid email or password';
+                msgEl.className = 'text-body-md text-red-600 text-center';
+                msgEl.classList.remove('hidden');
+                btn.textContent = 'Login';
+                btn.disabled = false;
+                return;
+            }
+
+            // Check password
+            const hashedPassword = hashPassword(password);
+            if (data.password !== hashedPassword) {
+                msgEl.textContent = 'Invalid email or password';
+                msgEl.className = 'text-body-md text-red-600 text-center';
+                msgEl.classList.remove('hidden');
+                btn.textContent = 'Login';
+                btn.disabled = false;
+                return;
+            }
+
+            // Login successful - save session
+            localStorage.setItem('admin_session', JSON.stringify({ email: data.email, id: data.id }));
+            showAdminDashboard();
+        });
+
+        // Setup first admin
+        document.getElementById('setup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('setup-email').value;
+            const password = document.getElementById('setup-password').value;
+            const msgEl = document.getElementById('setup-msg');
+            const btn = e.target.querySelector('button');
+
+            btn.textContent = 'Creating...';
+            btn.disabled = true;
+
+            const hashedPassword = hashPassword(password);
+
+            const { error } = await supabaseClient
+                .from('admin_users')
+                .insert({ email, password: hashedPassword });
+
+            if (error) {
+                msgEl.textContent = 'Error: ' + error.message;
+                msgEl.className = 'text-body-md text-red-600 text-center';
+                msgEl.classList.remove('hidden');
+                btn.textContent = 'Create Admin Account';
+                btn.disabled = false;
+                return;
+            }
+
+            // Success - login automatically
+            localStorage.setItem('admin_session', JSON.stringify({ email }));
+            msgEl.textContent = 'Admin created! Loading dashboard...';
+            msgEl.className = 'text-body-md text-green-600 text-center';
+            msgEl.classList.remove('hidden');
+
+            setTimeout(() => showAdminDashboard(), 1000);
+        });
+
+        function showAdminDashboard() {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('admin-section').classList.remove('hidden');
+            loadEssays();
+        }
+
+        function logout() {
+            localStorage.removeItem('admin_session');
+            document.getElementById('admin-section').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('login-form').reset();
+            checkAdmin();
+        }
+
         async function getEssays() {
             const { data, error } = await supabaseClient
                 .from('essays')
@@ -117,7 +292,6 @@
             return urlData.publicUrl;
         }
 
-        // Load existing essays
         async function loadEssays() {
             const { data } = await getEssays();
             const list = document.getElementById('essays-list');
@@ -139,13 +313,11 @@
             `).join('');
         }
 
-        // Generate slug from title
         document.getElementById('title').addEventListener('input', (e) => {
             const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
             document.getElementById('slug').value = slug;
         });
 
-        // Submit essay
         document.getElementById('essay-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const title = document.getElementById('title').value;
@@ -192,7 +364,14 @@
             setTimeout(() => msgEl.classList.add('hidden'), 5000);
         });
 
-        loadEssays();
+        // Initialize
+        (async function init() {
+            if (isLoggedIn()) {
+                showAdminDashboard();
+            } else {
+                await checkAdmin();
+            }
+        })();
     </script>
 </body>
 </html>
