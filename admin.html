@@ -67,8 +67,13 @@
                 <textarea id="excerpt" rows="2" class="w-full border border-on-surface/20 px-4 py-3 text-body-md focus:outline-none focus:border-primary"></textarea>
             </div>
             <div>
+                <label class="block text-label-caps font-label-caps mb-2">Thumbnail Image</label>
+                <input type="file" id="thumbnail" accept="image/*" class="w-full border border-on-surface/20 px-4 py-3 text-body-md focus:outline-none focus:border-primary file:mr-4 file:py-2 file:px-4 file:border-0 file:bg-primary file:text-on-primary file:cursor-pointer"/>
+                <p class="text-sm text-on-surface-variant mt-1">Upload an image for social media previews</p>
+            </div>
+            <div>
                 <label class="block text-label-caps font-label-caps mb-2">Content (HTML allowed)</label>
-                <textarea id="content" rows="15" required class="w-full border border-on-surface/20 px-4 py-3 text-body-md focus:outline-none focus:border-primary font-mono"></textarea>
+                <textarea id="content" rows="15" required class="w-full border border-on-surface/20 px-4 py-3 text-body-md focus:outline-none focus:border-primary font-mono" placeholder="Write your essay here. Use blank lines between paragraphs."></textarea>
             </div>
             <button type="submit" class="bg-primary text-on-primary px-8 py-3 font-label-caps text-label-caps uppercase hover:bg-primary-container transition-colors duration-200 self-start">
                 Publish Essay
@@ -82,8 +87,36 @@
         <div id="essays-list" class="flex flex-col gap-4"></div>
     </div>
 
-    <script src="js/supabase.js"></script>
     <script>
+        const SUPABASE_URL = 'https://obttxpduyfcayhsbezni.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9idHR4cGR1eWZjYXloc2Jlem5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NTY1NTAsImV4cCI6MjA5NDUzMjU1MH0.Ig_P6D7YtDR4pmXuEL04svp0FDz3pFHNYPVaA2x12cQ';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function getEssays() {
+            const { data, error } = await supabaseClient
+                .from('essays')
+                .select('*')
+                .order('published_at', { ascending: false });
+            return { data: data || [], error };
+        }
+
+        async function uploadImage(file) {
+            const fileName = `${Date.now()}-${file.name}`;
+            const { data, error } = await supabaseClient
+                .storage
+                .from('essays')
+                .upload(fileName, file);
+
+            if (error) throw error;
+
+            const { data: urlData } = supabaseClient
+                .storage
+                .from('essays')
+                .getPublicUrl(fileName);
+
+            return urlData.publicUrl;
+        }
+
         // Load existing essays
         async function loadEssays() {
             const { data } = await getEssays();
@@ -94,9 +127,12 @@
             }
             list.innerHTML = data.map(e => `
                 <div class="border border-on-surface/10 p-4 flex justify-between items-center">
-                    <div>
-                        <div class="font-bold">${e.title}</div>
-                        <div class="text-sm text-on-surface-variant">${e.slug}</div>
+                    <div class="flex items-center gap-4">
+                        ${e.thumbnail ? `<img src="${e.thumbnail}" class="w-12 h-12 object-cover rounded"/>` : ''}
+                        <div>
+                            <div class="font-bold">${e.title}</div>
+                            <div class="text-sm text-on-surface-variant">${e.slug}</div>
+                        </div>
                     </div>
                     <a href="essay.html?slug=${e.slug}" target="_blank" class="text-primary hover:underline text-sm">View</a>
                 </div>
@@ -116,17 +152,28 @@
             const slug = document.getElementById('slug').value;
             const excerpt = document.getElementById('excerpt').value;
             const content = document.getElementById('content').value;
+            const thumbnailFile = document.getElementById('thumbnail').files[0];
             const msgEl = document.getElementById('msg');
             const btn = e.target.querySelector('button');
 
             btn.textContent = 'Publishing...';
             btn.disabled = true;
 
+            let thumbnailUrl = null;
+            try {
+                if (thumbnailFile) {
+                    thumbnailUrl = await uploadImage(thumbnailFile);
+                }
+            } catch (err) {
+                console.error('Upload error:', err);
+            }
+
             const { error } = await supabaseClient.from('essays').insert({
                 title,
                 slug,
                 excerpt,
-                content
+                content,
+                thumbnail: thumbnailUrl
             });
 
             if (error) {
@@ -142,6 +189,7 @@
             btn.textContent = 'Publish Essay';
             btn.disabled = false;
             msgEl.classList.remove('hidden');
+            setTimeout(() => msgEl.classList.add('hidden'), 5000);
         });
 
         loadEssays();

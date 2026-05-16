@@ -4,6 +4,24 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Essays | Analyst's Journal</title>
+
+    <!-- Default Meta Tags -->
+    <meta name="description" content="Independent political analysis and essays on politics, power, and governance."/>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://mrahmanshamim00.github.io/analysts-journal/essay.html"/>
+    <meta property="og:title" content="Analyst's Journal | Independent Political Analysis"/>
+    <meta property="og:description" content="Independent political analysis and essays on politics, power, and governance."/>
+    <meta property="og:image" content="https://mrahmanshamim00.github.io/analysts-journal/og-image.png"/>
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:url" content="https://mrahmanshamim00.github.io/analysts-journal/essay.html"/>
+    <meta name="twitter:title" content="Analyst's Journal | Independent Political Analysis"/>
+    <meta name="twitter:description" content="Independent political analysis and essays on politics, power, and governance."/>
+    <meta name="twitter:image" content="https://mrahmanshamim00.github.io/analysts-journal/og-image.png"/>
+
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Merriweather:ital,wght@0,400;0,700;0,900;1,400&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -224,6 +242,20 @@
                     return;
                 }
 
+                // Update meta tags for social sharing
+                const siteUrl = 'https://mrahmanshamim00.github.io/analysts-journal';
+                document.querySelector('meta[property="og:url"]').setAttribute('content', `${siteUrl}/essay.html?slug=${slug}`);
+                document.querySelector('meta[name="twitter:url"]').setAttribute('content', `${siteUrl}/essay.html?slug=${slug}`);
+                document.querySelector('meta[property="og:title"]').setAttribute('content', essay.title + ' | Analyst\'s Journal');
+                document.querySelector('meta[name="twitter:title"]').setAttribute('content', essay.title + ' | Analyst\'s Journal');
+                document.querySelector('meta[property="og:description"]').setAttribute('content', essay.excerpt || essay.content.substring(0, 150) + '...');
+                document.querySelector('meta[name="twitter:description"]').setAttribute('content', essay.excerpt || essay.content.substring(0, 150) + '...');
+                if (essay.thumbnail) {
+                    document.querySelector('meta[property="og:image"]').setAttribute('content', essay.thumbnail);
+                    document.querySelector('meta[name="twitter:image"]').setAttribute('content', essay.thumbnail);
+                }
+                document.title = essay.title + ' | Analyst\'s Journal';
+
                 const { data: comments } = await getComments(essay.id);
                 const publishedDate = new Date(essay.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -234,6 +266,7 @@
                 content.innerHTML = `
                     <header class="mb-12">
                         <a href="essay.html" class="text-label-caps font-label-caps text-primary uppercase mb-6 inline-block hover:text-primary-container transition-colors">← Back to Essays</a>
+                        ${essay.thumbnail ? `<img src="${essay.thumbnail}" alt="${essay.title}" class="w-full h-64 object-cover rounded mb-6"/>` : ''}
                         <div class="flex items-center gap-4 text-label-caps font-label-caps text-on-surface-variant uppercase mb-4">
                             <span>${publishedDate}</span>
                             <span>•</span>
@@ -358,10 +391,13 @@
                         ${essays.map(essay => {
                             const date = new Date(essay.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
                             return `
-                                <article class="flex flex-col gap-3 group border-b border-on-surface/10 pb-8 last:border-0">
-                                    <span class="text-label-caps font-label-caps text-primary uppercase">${date}</span>
-                                    <a href="essay.html?slug=${essay.slug}" class="text-headline-lg-mobile md:text-headline-lg font-headline-lg text-on-surface group-hover:text-primary transition-colors duration-200">${essay.title}</a>
-                                    ${essay.excerpt ? `<p class="text-body-md font-body-md text-on-surface-variant">${essay.excerpt}</p>` : ''}
+                                <article class="flex gap-4 group border-b border-on-surface/10 pb-8 last:border-0">
+                                    ${essay.thumbnail ? `<a href="essay.html?slug=${essay.slug}"><img src="${essay.thumbnail}" alt="${essay.title}" class="w-32 h-32 object-cover rounded flex-shrink-0 group-hover:opacity-80 transition-opacity"/></a>` : ''}
+                                    <div class="flex flex-col gap-2">
+                                        <span class="text-label-caps font-label-caps text-primary uppercase">${date}</span>
+                                        <a href="essay.html?slug=${essay.slug}" class="text-headline-lg-mobile md:text-headline-lg font-headline-lg text-on-surface group-hover:text-primary transition-colors duration-200">${essay.title}</a>
+                                        ${essay.excerpt ? `<p class="text-body-md font-body-md text-on-surface-variant">${essay.excerpt}</p>` : ''}
+                                    </div>
                                 </article>
                             `;
                         }).join('')}
