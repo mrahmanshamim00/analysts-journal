@@ -96,23 +96,53 @@
     <style>
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         .prose p { margin-bottom: 1.5rem; }
+        #toast {
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-background text-on-background font-body-md text-body-md antialiased min-h-screen flex flex-col pt-16">
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-on-surface text-surface-container-lowest px-6 py-4 rounded shadow-lg z-50">
+        <span id="toast-msg"></span>
+    </div>
+
     <!-- TopNavBar -->
     <nav class="bg-background fixed top-0 w-full border-b border-on-surface/10 z-50">
         <div class="flex justify-between items-center w-full px-gutter max-w-container-max mx-auto h-16">
             <a class="text-headline-md font-headline-md font-black tracking-tight text-on-surface" href="index.html">
                 Analyst's Journal
             </a>
-            <div class="hidden md:flex items-center gap-8">
+            <div id="nav-menu" class="hidden md:flex items-center gap-8">
                 <a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary transition-colors duration-200" href="index.html">Home</a>
                 <a class="text-primary border-b-2 border-primary pb-1 opacity-80 font-label-caps text-label-caps" href="essay.html">Essays</a>
                 <a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary transition-colors duration-200" href="about.html">About</a>
             </div>
-            <button class="bg-on-surface text-surface-container-lowest font-label-caps text-label-caps px-6 py-3 hover:bg-primary transition-colors duration-200">
-                Subscribe
-            </button>
+            <div class="flex items-center gap-4">
+                <button class="hidden md:block bg-on-surface text-surface-container-lowest font-label-caps text-label-caps px-6 py-3 hover:bg-primary transition-colors duration-200" onclick="scrollToSubscribe()">
+                    Subscribe
+                </button>
+                <button class="md:hidden text-on-surface p-2" onclick="toggleMenu()">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-background border-b border-on-surface/10 px-gutter py-4">
+            <div class="flex flex-col gap-4">
+                <a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary transition-colors uppercase" href="index.html">Home</a>
+                <a class="text-primary border-b-2 border-primary pb-1 text-label-caps font-label-caps uppercase" href="essay.html">Essays</a>
+                <a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary transition-colors uppercase" href="about.html">About</a>
+                <button class="bg-on-surface text-surface-container-lowest font-label-caps text-label-caps px-6 py-3 hover:bg-primary transition-colors duration-200" onclick="scrollToSubscribe()">
+                    Subscribe
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -142,6 +172,44 @@
 
     <script src="js/supabase.js"></script>
     <script>
+        // Mobile menu toggle
+        function toggleMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        // Toast notification
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            toastMsg.textContent = msg;
+            toast.style.backgroundColor = isError ? '#ba1a1a' : '#303031';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // Scroll to subscribe
+        function scrollToSubscribe() {
+            document.getElementById('subscribe-section').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('mobile-menu').classList.add('hidden');
+        }
+
+        // Share functions
+        function shareTwitter() {
+            const url = encodeURIComponent(window.location.href);
+            const title = encodeURIComponent(document.title);
+            window.open(`https://twitter.com/intent/tweet?url=${url}&text=${title}`, '_blank');
+        }
+
+        function shareFacebook() {
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href);
+            showToast('Link copied to clipboard!');
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         const slug = urlParams.get('slug');
 
@@ -159,27 +227,48 @@
                 const { data: comments } = await getComments(essay.id);
                 const publishedDate = new Date(essay.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
+                // Calculate reading time (rough estimate: 200 words per minute)
+                const wordCount = essay.content.split(/\s+/).length;
+                const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+
                 content.innerHTML = `
                     <header class="mb-12">
                         <a href="essay.html" class="text-label-caps font-label-caps text-primary uppercase mb-6 inline-block hover:text-primary-container transition-colors">← Back to Essays</a>
-                        <span class="text-label-caps font-label-caps text-on-surface-variant uppercase block mb-4">${publishedDate}</span>
+                        <div class="flex items-center gap-4 text-label-caps font-label-caps text-on-surface-variant uppercase mb-4">
+                            <span>${publishedDate}</span>
+                            <span>•</span>
+                            <span>${readingTime} min read</span>
+                        </div>
                         <h1 class="text-headline-xl font-headline-xl text-on-surface mb-6">${essay.title}</h1>
-                        ${essay.excerpt ? `<p class="text-headline-md font-headline-md text-on-surface-variant">${essay.excerpt}</p>` : ''}
+                        ${essay.excerpt ? `<p class="text-headline-md font-headline-md text-on-surface-variant mb-6">${essay.excerpt}</p>` : ''}
+                        <!-- Share buttons -->
+                        <div class="flex items-center gap-4 mt-4">
+                            <span class="text-label-caps font-label-caps text-on-surface-variant">Share:</span>
+                            <button onclick="shareTwitter()" class="text-on-surface-variant hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined">share</span>
+                            </button>
+                            <button onclick="shareFacebook()" class="text-on-surface-variant hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined">facebook</span>
+                            </button>
+                            <button onclick="copyLink()" class="text-on-surface-variant hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined">link</span>
+                            </button>
+                        </div>
                     </header>
                     <hr class="border-t border-on-surface/20 mb-12"/>
                     <article class="prose text-body-lg font-body-lg text-on-surface">
-                        ${essay.content}
+                        ${formatEssayContent(essay.content)}
                     </article>
                     <hr class="border-t border-on-surface/20 mt-16 mb-12"/>
                     <section>
                         <h2 class="text-headline-lg font-headline-lg text-on-surface mb-8">Comments (${comments.length})</h2>
                         <div id="comments-list" class="flex flex-col gap-6 mb-8">
-                            ${comments.map(c => `
+                            ${comments.length > 0 ? comments.map(c => `
                                 <div class="border border-on-surface/10 p-4 rounded">
                                     <div class="text-label-caps font-label-caps text-primary mb-2">${c.name}</div>
                                     <p class="text-body-md text-on-surface">${c.content}</p>
                                 </div>
-                            `).join('')}
+                            `).join('') : '<p class="text-on-surface-variant">No comments yet. Be the first to comment!</p>'}
                         </div>
                         <form id="comment-form" class="flex flex-col gap-4 bg-surface-container p-6">
                             <h3 class="text-headline-md font-headline-md text-on-surface mb-2">Leave a Comment</h3>
@@ -188,28 +277,62 @@
                             <button type="submit" class="bg-primary text-on-primary px-8 py-3 font-label-caps text-label-caps uppercase hover:bg-primary-container transition-colors duration-200 self-start">
                                 Post Comment
                             </button>
-                            <p id="comment-msg" class="text-body-md hidden"></p>
+                        </form>
+                    </section>
+                    <!-- Newsletter Section -->
+                    <section id="subscribe-section" class="bg-on-surface text-surface-container-lowest p-12 border border-on-surface mt-16">
+                        <h2 class="text-headline-lg font-headline-lg mb-4">Enjoyed this essay?</h2>
+                        <p class="text-body-md font-body-md mb-6 opacity-80">Subscribe for weekly analysis. No spam, unsubscribe anytime.</p>
+                        <form id="subscribe-form" class="flex flex-col sm:flex-row gap-4">
+                            <input type="email" id="sub-email" required placeholder="Your email address" class="flex-1 bg-transparent border border-surface-container-lowest px-4 py-3 text-body-md font-body-md text-surface-container-lowest placeholder:text-surface-container-lowest/50 focus:outline-none focus:border-primary"/>
+                            <button type="submit" class="bg-primary text-on-primary px-8 py-3 font-label-caps text-label-caps uppercase hover:bg-primary-container transition-colors duration-200">
+                                Subscribe
+                            </button>
                         </form>
                     </section>
                 `;
 
+                // Comment form
                 document.getElementById('comment-form').addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const name = document.getElementById('comment-name').value;
-                    const content = document.getElementById('comment-content').value;
-                    const msgEl = document.getElementById('comment-msg');
+                    const commentContent = document.getElementById('comment-content').value;
+                    const btn = e.target.querySelector('button');
 
-                    const { success, error } = await addComment(essay.id, name, content);
+                    btn.textContent = 'Posting...';
+                    btn.disabled = true;
+
+                    const { success, error } = await addComment(essay.id, name, commentContent);
                     if (success) {
-                        msgEl.textContent = '✓ Comment posted!';
-                        msgEl.className = 'text-body-md text-green-600 mt-2';
+                        showToast('✓ Comment posted!');
                         document.getElementById('comment-form').reset();
-                        render(); // Reload to show new comment
+                        render();
                     } else {
-                        msgEl.textContent = 'Error: ' + (error?.message || 'Failed to post comment');
-                        msgEl.className = 'text-body-md text-red-600 mt-2';
+                        showToast('Error: ' + (error?.message || 'Failed to post comment'), true);
                     }
-                    msgEl.classList.remove('hidden');
+
+                    btn.textContent = 'Post Comment';
+                    btn.disabled = false;
+                });
+
+                // Subscribe form in essay page
+                document.getElementById('subscribe-form')?.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('sub-email').value;
+                    const btn = e.target.querySelector('button');
+                    btn.textContent = 'Subscribing...';
+                    btn.disabled = true;
+
+                    const { success, error } = await subscribe(email);
+                    if (success) {
+                        showToast('✓ Thanks for subscribing!');
+                        document.getElementById('sub-email').value = '';
+                    } else {
+                        showToast('Error: ' + (error?.message || 'Something went wrong'), true);
+                    }
+
+                    btn.textContent = 'Subscribe';
+                    btn.disabled = false;
                 });
             } else {
                 // Show essay list

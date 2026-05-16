@@ -53,3 +53,15 @@ async function addComment(essayId, name, content) {
   });
   return { success: !error, error };
 }
+
+// Convert newlines to paragraph breaks for essay content
+function formatEssayContent(content) {
+  if (!content) return '';
+  // Split by double newlines to create paragraphs
+  const paragraphs = content.split(/\n\n+/).filter(p => p.trim());
+  return paragraphs.map(p => {
+    // Convert single newlines within paragraphs to <br>
+    const lines = p.replace(/\n/g, '<br>');
+    return `<p>${lines}</p>`;
+  }).join('');
+}

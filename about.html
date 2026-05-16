@@ -4,6 +4,7 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>About - Analyst's Journal</title>
+    <meta name="description" content="Learn more about the analyst behind the political analysis."/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Merriweather:ital,wght@0,400;0,700;0,900;1,400&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -95,23 +96,53 @@
     </script>
     <style>
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        #toast {
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-background text-on-background font-body-md text-body-md antialiased min-h-screen flex flex-col pt-16">
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-on-surface text-surface-container-lowest px-6 py-4 rounded shadow-lg z-50">
+        <span id="toast-msg"></span>
+    </div>
+
     <!-- TopNavBar -->
     <nav class="bg-background fixed top-0 w-full border-b border-on-surface/10 z-50">
         <div class="flex justify-between items-center w-full px-gutter max-w-container-max mx-auto h-16">
-            <a class="text-headline-md font-headline-md font-black tracking-tight text-on-surface" href="#">
+            <a class="text-headline-md font-headline-md font-black tracking-tight text-on-surface" href="index.html">
                 Analyst's Journal
             </a>
-            <div class="hidden md:flex items-center gap-8">
+            <div id="nav-menu" class="hidden md:flex items-center gap-8">
                 <a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary transition-colors duration-200" href="index.html">Home</a>
                 <a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary transition-colors duration-200" href="essay.html">Essays</a>
                 <a class="text-primary border-b-2 border-primary pb-1 opacity-80 font-label-caps text-label-caps" href="about.html">About</a>
             </div>
-            <button class="bg-on-surface text-surface-container-lowest font-label-caps text-label-caps px-6 py-3 hover:bg-primary transition-colors duration-200">
-                Subscribe
-            </button>
+            <div class="flex items-center gap-4">
+                <button class="hidden md:block bg-on-surface text-surface-container-lowest font-label-caps text-label-caps px-6 py-3 hover:bg-primary transition-colors duration-200" onclick="scrollToSubscribe()">
+                    Subscribe
+                </button>
+                <button class="md:hidden text-on-surface p-2" onclick="toggleMenu()">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-background border-b border-on-surface/10 px-gutter py-4">
+            <div class="flex flex-col gap-4">
+                <a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary transition-colors uppercase" href="index.html">Home</a>
+                <a class="text-on-surface-variant font-label-caps text-label-caps hover:text-primary transition-colors uppercase" href="essay.html">Essays</a>
+                <a class="text-primary border-b-2 border-primary pb-1 text-label-caps font-label-caps uppercase" href="about.html">About</a>
+                <button class="bg-on-surface text-surface-container-lowest font-label-caps text-label-caps px-6 py-3 hover:bg-primary transition-colors duration-200" onclick="scrollToSubscribe()">
+                    Subscribe
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -160,7 +191,7 @@
         </section>
 
         <!-- Contact Section -->
-        <section class="bg-on-surface text-surface-container-lowest p-12 border border-on-surface">
+        <section id="contact-section" class="bg-on-surface text-surface-container-lowest p-12 border border-on-surface">
             <h2 class="text-headline-lg font-headline-lg mb-6">Contact</h2>
             <p class="text-body-md font-body-md mb-8 opacity-80">
                 For professional inquiries, speaking engagements, or editorial correspondence.
@@ -173,7 +204,18 @@
                     Send Message
                 </button>
             </form>
-            <p id="contact-message-result" class="mt-4 text-body-md hidden"></p>
+        </section>
+
+        <!-- Newsletter Section -->
+        <section id="subscribe-section" class="max-w-reading-column mx-auto w-full bg-on-surface text-surface-container-lowest p-12 border border-on-surface mt-16">
+            <h2 class="text-headline-lg font-headline-lg mb-4">Stay Informed</h2>
+            <p class="text-body-md font-body-md mb-6 opacity-80">Weekly analysis delivered to your inbox. No noise, no spam.</p>
+            <form id="subscribe-form" class="flex flex-col sm:flex-row gap-4">
+                <input type="email" id="sub-email" required placeholder="Your email address" class="flex-1 bg-transparent border border-surface-container-lowest px-4 py-3 text-body-md font-body-md text-surface-container-lowest placeholder:text-surface-container-lowest/50 focus:outline-none focus:border-primary"/>
+                <button type="submit" class="bg-primary text-on-primary px-8 py-3 font-label-caps text-label-caps uppercase hover:bg-primary-container transition-colors duration-200">
+                    Subscribe
+                </button>
+            </form>
         </section>
     </main>
 
@@ -189,20 +231,39 @@
                 </div>
             </div>
             <div class="flex flex-wrap gap-8">
-                <a class="text-inverse-on-surface/70 hover:text-primary-fixed transition-all font-label-caps text-label-caps uppercase" href="#">Terms</a>
-                <a class="text-inverse-on-surface/70 hover:text-primary-fixed transition-all font-label-caps text-label-caps uppercase" href="#">Privacy</a>
-                <a class="text-inverse-on-surface/70 hover:text-primary-fixed transition-all font-label-caps text-label-caps uppercase" href="#">Contact</a>
+                <a class="text-inverse-on-surface/70 hover:text-primary-fixed transition-all font-label-caps text-label-caps uppercase" href="admin.html">Admin</a>
             </div>
         </div>
     </footer>
     <script src="js/supabase.js"></script>
     <script>
+        // Mobile menu toggle
+        function toggleMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        // Toast notification
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            toastMsg.textContent = msg;
+            toast.style.backgroundColor = isError ? '#ba1a1a' : '#303031';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // Scroll to subscribe
+        function scrollToSubscribe() {
+            document.getElementById('subscribe-section').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('mobile-menu').classList.add('hidden');
+        }
+
+        // Contact form
         document.getElementById('contact-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('contact-name').value;
             const email = document.getElementById('contact-email').value;
             const message = document.getElementById('contact-message').value;
-            const msgEl = document.getElementById('contact-message-result');
             const btn = e.target.querySelector('button');
             btn.textContent = 'Sending...';
             btn.disabled = true;
@@ -210,17 +271,34 @@
             const { success, error } = await submitContact(name, email, message);
 
             if (success) {
-                msgEl.textContent = '✓ Message sent! I\'ll get back to you soon.';
-                msgEl.className = 'mt-4 text-body-md text-green-400';
+                showToast('✓ Message sent! I\'ll get back to you soon.');
                 document.getElementById('contact-form').reset();
             } else {
-                msgEl.textContent = 'Error: ' + (error?.message || 'Something went wrong');
-                msgEl.className = 'mt-4 text-body-md text-red-400';
+                showToast('Error: ' + (error?.message || 'Something went wrong'), true);
             }
 
             btn.textContent = 'Send Message';
             btn.disabled = false;
-            msgEl.classList.remove('hidden');
+        });
+
+        // Subscribe form
+        document.getElementById('subscribe-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('sub-email').value;
+            const btn = e.target.querySelector('button');
+            btn.textContent = 'Subscribing...';
+            btn.disabled = true;
+
+            const { success, error } = await subscribe(email);
+            if (success) {
+                showToast('✓ Thanks for subscribing!');
+                document.getElementById('sub-email').value = '';
+            } else {
+                showToast('Error: ' + (error?.message || 'Something went wrong'), true);
+            }
+
+            btn.textContent = 'Subscribe';
+            btn.disabled = false;
         });
     </script>
 </body>
